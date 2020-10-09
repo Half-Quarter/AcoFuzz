@@ -5051,7 +5051,7 @@ static u8 fuzz_one(char** argv) {
        cases. */
 
     if ((queue_cur->fuzz_level > 0 || !queue_cur->favored) &&
-        UR(100) < SKIP_TO_NEW_PROB) return 1;
+        UR(2) < SKIP_TO_NEW_PROB) return 1;
 
   } else if (!dumb_mode && !queue_cur->favored && queued_paths > 10) {
 
