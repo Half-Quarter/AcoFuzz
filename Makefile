@@ -13,10 +13,10 @@
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
 
-PROGNAME    = afl
+PROGNAME    = afl-fast-test
 VERSION     = $(shell grep '^\#define VERSION ' config.h | cut -d '"' -f2)
 
-PREFIX     ?= /usr/local
+PREFIX     ?= /usr/local/aflfastest
 BIN_PATH    = $(PREFIX)/bin
 HELPER_PATH = $(PREFIX)/lib/afl
 DOC_PATH    = $(PREFIX)/share/doc/afl

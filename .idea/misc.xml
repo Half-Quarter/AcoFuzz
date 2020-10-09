@@ -11,7 +11,7 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="C:\Users\Administrator\Desktop\afl-fast-test" />
+            <option value="I:\afl-fast-test" />
           </set>
         </option>
         <option name="switches" value="--just-print --print-directory --keep-going" />
