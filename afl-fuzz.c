@@ -173,6 +173,7 @@ EXP_ST u32 queued_paths,              /* Total number of queued testcases */
            var_byte_count,            /* Bitmap bytes with var behavior   */
            current_entry,             /* Current queue entry ID           */
            now_fi,
+           now_score,
            havoc_div = 1;             /* Cycle count divisor for havoc    */
 
 
@@ -4131,7 +4132,7 @@ static void show_stats(void) {
   SAYF("    map density : %s%-21s " bSTG bV "\n", t_byte_ratio > 70 ? cLRD : 
        ((t_bytes < 200 && !dumb_mode) ? cPIN : cRST), tmp);
 //
-  sprintf(tmp, "%s(%s)(%s)", DI(queue_cur->fuzz_level),DI(queue_cur->n_fuzz),DI(now_fi));
+  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DI(queue_cur->n_fuzz),DI(now_fi),DI(now_score));
 
   SAYF(bV bSTOP " si(fi)(nowfi) : " cRST "%-17s " bSTG bV, tmp);
 //
@@ -4826,7 +4827,7 @@ static u32 calculate_score(struct queue_entry* q) {
   /* Make sure that we don't go over limit. */
 
   if (perf_score > HAVOC_MAX_MULT * 100) perf_score = HAVOC_MAX_MULT * 100;
-
+  now_score = perf_score;
   return perf_score;
 
 }
