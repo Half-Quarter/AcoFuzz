@@ -172,7 +172,9 @@ EXP_ST u32 queued_paths,              /* Total number of queued testcases */
            useless_at_start,          /* Number of useless starting paths */
            var_byte_count,            /* Bitmap bytes with var behavior   */
            current_entry,             /* Current queue entry ID           */
+           now_fi,
            havoc_div = 1;             /* Cycle count divisor for havoc    */
+
 
 EXP_ST u64 total_crashes,             /* Total number of crashes          */
            unique_crashes,            /* Crashes with unique signatures   */
@@ -4129,9 +4131,9 @@ static void show_stats(void) {
   SAYF("    map density : %s%-21s " bSTG bV "\n", t_byte_ratio > 70 ? cLRD : 
        ((t_bytes < 200 && !dumb_mode) ? cPIN : cRST), tmp);
 //
-  sprintf(tmp, "%s (%s)", DI(queue_cur->fuzz_level),DI(queue_cur->n_fuzz));
+  sprintf(tmp, "%s(%s)(%s)", DI(queue_cur->fuzz_level),DI(queue_cur->n_fuzz),DI(now_fi));
 
-  SAYF(bV bSTOP " si(fi) : " cRST "%-17s " bSTG bV, tmp);
+  SAYF(bV bSTOP " si(fi)(nowfi) : " cRST "%-17s " bSTG bV, tmp);
 //
   sprintf(tmp, "%0.02f bits/tuple",
           t_bytes ? (((double)t_bits) / t_bytes) : 0);
@@ -4763,7 +4765,7 @@ static u32 calculate_score(struct queue_entry* q) {
 
   u64 fuzz = q->n_fuzz;
   u64 fuzz_total;
-
+  now_fi = q->n_fuzz;
   u32 n_paths, fuzz_mu;
   u32 factor = 1;
 
