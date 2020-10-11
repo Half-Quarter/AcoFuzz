@@ -216,6 +216,10 @@
 
 // #define SIMPLE_FILES
 
+// pm
+#define PM_INIT   1
+#define PM_DECAY  0.8
+
 /* List of interesting values to use in fuzzing. */
 
 #define INTERESTING_8 \

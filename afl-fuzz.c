@@ -4361,6 +4361,16 @@ static void show_stats(void) {
 
 }
 
+// After each round of fuzzy, the pheromone of each seed decays
+static void decay_pm(void){
+
+    struct queue_entry* q = queue;
+    while (q) {
+        q->n_fuzz = q->n_fuzz * PM_DECAY;
+        q = q->next;
+    }
+}
+
 
 /* Display quick statistics at the end of processing the input directory,
    plus a bunch of warnings. Some calibration stuff also ended up here,
@@ -5051,7 +5061,7 @@ static u8 fuzz_one(char** argv) {
        cases. */
 
     if ((queue_cur->fuzz_level > 0 || !queue_cur->favored) &&
-        UR(2) < SKIP_TO_NEW_PROB) return 1;
+        UR(100) < SKIP_TO_NEW_PROB) return 1;
 
   } else if (!dumb_mode && !queue_cur->favored && queued_paths > 10) {
 
@@ -5159,7 +5169,7 @@ static u8 fuzz_one(char** argv) {
 
   orig_perf = perf_score = calculate_score(queue_cur);
 
-  //if (perf_score == 0) goto abandon_entry;
+  if (perf_score == 0) goto abandon_entry;
 
   /* Skip right away if -d is given, if it has not been chosen sufficiently
      often to warrant the expensive deterministic stage (fuzz_level), or
@@ -8136,6 +8146,7 @@ int main(int argc, char** argv) {
       queue_cycle++;
       current_entry     = 0;
       cur_skipped_paths = 0;
+      decay_pm();
       queue_cur         = queue;
 
       while (seek_to) {
