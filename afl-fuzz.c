@@ -234,6 +234,7 @@ static s32 cpu_aff = -1;       	      /* Selected CPU core                */
 #endif /* HAVE_AFFINITY */
 
 static FILE* plot_file;               /* Gnuplot output file              */
+static FILE* information_file;
 
 struct queue_entry {
 
@@ -7190,6 +7191,11 @@ static void usage(u8* argv0) {
 
 }
 
+/* output data */
+static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 n_fuzz,u64 exec_time){
+    fprintf(information_file,"len:%d favored:%u fuzz_level:%u n_fuzz:%llu exec_time:%llu",len,favored,fuzz_level,n_fuzz,exec_time);
+}
+
 
 /* Prepare output directories and fds. */
 
@@ -7310,6 +7316,18 @@ EXP_ST void setup_dirs_fds(void) {
                      "pending_total, pending_favs, map_size, unique_crashes, "
                      "unique_hangs, max_depth, execs_per_sec\n");
                      /* ignore errors */
+
+//out_data
+    information_file_name = alloc_printf("%s/information",out_dir);
+    information_fd = open(information_file_name,O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if(information_fd < 0){
+        PFATAL("Unable to create '%s'", information_file_name);
+    }
+
+    information_file = fdopen(information_fd,"w");
+    if(!information_file){
+        PFATAL("fdopen() failed");
+    }
 
 }
 
@@ -8185,7 +8203,7 @@ int main(int argc, char** argv) {
         sync_fuzzers(use_argv);
 
     }
-
+    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->n_fuzz,queue_cur->exec_us)
     skipped_fuzz = fuzz_one(use_argv);
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
