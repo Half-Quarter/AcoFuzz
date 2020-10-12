@@ -7318,10 +7318,10 @@ EXP_ST void setup_dirs_fds(void) {
                      /* ignore errors */
 
 //out_data
-    information_file_name = alloc_printf("%s/information",out_dir);
-    information_fd = open(information_file_name,O_WRONLY | O_CREAT | O_EXCL, 0600);
+    tmp = alloc_printf("%s/information",out_dir);
+    information_fd = open(tmp,O_WRONLY | O_CREAT | O_EXCL, 0600);
     if(information_fd < 0){
-        PFATAL("Unable to create '%s'", information_file_name);
+        PFATAL("Unable to create '%s'", tmp);
     }
 
     information_file = fdopen(information_fd,"w");
@@ -8203,7 +8203,7 @@ int main(int argc, char** argv) {
         sync_fuzzers(use_argv);
 
     }
-    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->n_fuzz,queue_cur->exec_us)
+    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->n_fuzz,queue_cur->exec_us);
     skipped_fuzz = fuzz_one(use_argv);
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
