@@ -3180,6 +3180,7 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
 
     if (hnb == 2) {
       queue_top->has_new_cov = 1;
+      queue_cur->n_fuzz = queue_cur->n_fuzz * PM_REWARD;
       queued_with_cov++;
     }
 
@@ -4812,10 +4813,12 @@ static u32 calculate_score(struct queue_entry* q) {
       break;
     
     case FAST:
-      if (q->fuzz_level < 16) {
-         factor = ((u32) (1 << q->fuzz_level)) / (fuzz == 0 ? 1 : fuzz); 
-      } else
-        factor = MAX_FACTOR / (fuzz == 0 ? 1 : next_p2 (fuzz));
+      if(!q->fuzz_level == 0) {
+          if (q->fuzz_level < 16) {
+              factor = ((u32) (1 << q->fuzz_level)) / (fuzz == 0 ? 1 : fuzz);
+          } else
+              factor = MAX_FACTOR / (fuzz == 0 ? 1 : next_p2(fuzz));
+      }
       break;
 
     case LIN:
