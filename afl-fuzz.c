@@ -1266,12 +1266,10 @@ static void update_bitmap_score(struct queue_entry* q) {
          u64 top_rated_fuzz_p2    = next_p2 (top_rated[i]->n_fuzz);
          u64 top_rated_fav_factor = top_rated[i]->exec_us * top_rated[i]->len;
 
+
+
+         if (fav_factor > top_rated_fav_factor) continue;
          if (fuzz_p2 > top_rated_fuzz_p2) continue;
-         else if (fuzz_p2 == top_rated_fuzz_p2) {
-
-           if (fav_factor > top_rated_fav_factor) continue;
-
-         }
 
          /* Looks like we're going to win. Decrease ref count for the
             previous winner, discard its trace_bits[] if necessary. */
@@ -4819,6 +4817,8 @@ static u32 calculate_score(struct queue_entry* q) {
           } else
               factor = MAX_FACTOR / (fuzz == 0 ? 1 : next_p2(fuzz));
       }
+      else
+          factor = 4;
       break;
 
     case LIN:
