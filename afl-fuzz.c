@@ -4133,7 +4133,7 @@ static void show_stats(void) {
 //
   sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DI(queue_cur->n_fuzz),DI(now_fi),DI(now_score));
 
-  SAYF(bV bSTOP " si(fi)(nowfi) : " cRST "%-17s " bSTG bV, tmp);
+  SAYF(bV bSTOP " si(fi)(nowfi)(score) : " cRST "%-17s " bSTG bV, tmp);
 //
   sprintf(tmp, "%0.02f bits/tuple",
           t_bytes ? (((double)t_bits) / t_bytes) : 0);
