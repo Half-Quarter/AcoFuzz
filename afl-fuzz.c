@@ -7324,7 +7324,7 @@ EXP_ST void setup_dirs_fds(void) {
         PFATAL("Unable to create '%s'", tmp);
     }
     ck_free(tmp);
-    information_file = fdopen(information_fd,"w");
+    information_file = fdopen(fd,"w");
     if(!information_file){
         PFATAL("fdopen() failed");
     }
