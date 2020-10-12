@@ -7319,11 +7319,11 @@ EXP_ST void setup_dirs_fds(void) {
 
 //out_data
     tmp = alloc_printf("%s/information",out_dir);
-    information_fd = open(tmp,O_WRONLY | O_CREAT | O_EXCL, 0600);
-    if(information_fd < 0){
+    fd = open(tmp,O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if(fd < 0){
         PFATAL("Unable to create '%s'", tmp);
     }
-
+    ck_free(tmp);
     information_file = fdopen(information_fd,"w");
     if(!information_file){
         PFATAL("fdopen() failed");
