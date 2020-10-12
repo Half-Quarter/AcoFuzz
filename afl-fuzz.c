@@ -4818,7 +4818,12 @@ static u32 calculate_score(struct queue_entry* q) {
               factor = MAX_FACTOR / (fuzz == 0 ? 1 : next_p2(fuzz));
       }
       else
-          factor = 4;
+          if(q->n_fuzz<=1) {
+              factor = 4;
+          }
+          else {
+              factor = 2;
+          }
       break;
 
     case LIN:
