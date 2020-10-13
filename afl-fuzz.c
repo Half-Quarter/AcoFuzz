@@ -4021,7 +4021,7 @@ static void show_stats(void) {
 
   sprintf(tmp + banner_pad, "%s " cLCY VERSION cLGN
           " (%s)",  crash_mode ? cPIN "peruvian were-rabbit" : 
-          cYEL "american fuzzy lop (fast)", use_banner);
+          cYEL "afl-fuzz (iir)", use_banner);
 
   SAYF("\n%s\n\n", tmp);
 
@@ -7852,7 +7852,7 @@ int main(int argc, char** argv) {
   struct timeval tv;
   struct timezone tz;
 
-  SAYF(cCYA "afl-fuzz " cBRI VERSION cRST " by <lcamtuf@google.com>. Power schedules by <marcel.boehme@acm.org>\n");
+  SAYF(cCYA "afl-iir " cBRI VERSION cRST " \n");
 
   doc_path = access(DOC_PATH, F_OK) ? "docs" : DOC_PATH;
 
