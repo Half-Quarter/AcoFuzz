@@ -3148,7 +3148,7 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
   struct queue_entry* q = queue;
   while (q) {
     if (q->exec_cksum == cksum)
-      q->pm = q->n_fuzz + 1;
+      q->pm = q->pm + 1;
 
     q = q->next;
 
@@ -3179,7 +3179,7 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
 
     if (hnb == 2) {
       queue_top->has_new_cov = 1;
-      queue_cur->n_fuzz = queue_cur->n_fuzz * PM_REWARD;
+      queue_cur->pm = queue_cur->pm * PM_REWARD;
       queued_with_cov++;
     }
 
@@ -4132,7 +4132,7 @@ static void show_stats(void) {
   SAYF("    map density : %s%-21s " bSTG bV "\n", t_byte_ratio > 70 ? cLRD : 
        ((t_bytes < 200 && !dumb_mode) ? cPIN : cRST), tmp);
 //
-  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DI(queue_cur->n_fuzz),DI(now_fi),DI(now_score));
+  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DI(queue_cur->pm),DI(now_fi),DI(now_score));
 
   SAYF(bV bSTOP " si(fi)(nowfi)(score) : " cRST "%-17s " bSTG bV, tmp);
 //
@@ -4366,7 +4366,7 @@ static void decay_pm(void){
 
     struct queue_entry* q = queue;
     while (q) {
-        q->n_fuzz = q->n_fuzz * PM_DECAY;
+        q->pm = q->pm * PM_DECAY;
         q = q->next;
     }
 }
@@ -4774,9 +4774,9 @@ static u32 calculate_score(struct queue_entry* q) {
 
   }
 
-  u64 fuzz = q->n_fuzz;
+  u64 fuzz = q->pm;
   u64 fuzz_total;
-  now_fi = q->n_fuzz;
+  now_fi = q->pm;
   u32 n_paths, fuzz_mu;
   u32 factor = 1;
 
@@ -4795,7 +4795,7 @@ static u32 calculate_score(struct queue_entry* q) {
 
       struct queue_entry *queue_it = queue;	
       while (queue_it) {
-        fuzz_total += queue_it->n_fuzz;
+        fuzz_total += queue_it->pm;
         n_paths ++;
         queue_it = queue_it->next;
       }
@@ -4819,7 +4819,7 @@ static u32 calculate_score(struct queue_entry* q) {
               factor = MAX_FACTOR / (fuzz == 0 ? 1 : next_p2(fuzz));
       }
       else
-          if(q->n_fuzz<=1) {
+          if(q->pm<=1) {
               factor = 4;
           }
           else {
