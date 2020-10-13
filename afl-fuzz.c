@@ -7193,7 +7193,7 @@ static void usage(u8* argv0) {
 
 /* output data */
 static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 n_fuzz,u64 exec_time){
-    fprintf(information_file,"len:%d favored:%u fuzz_level:%u n_fuzz:%llu exec_time:%llu",len,favored,fuzz_level,n_fuzz,exec_time);
+    fprintf(information_file,"len:%d favored:%u fuzz_level:%u n_fuzz:%llu exec_time:%llu \n",len,favored,fuzz_level,n_fuzz,exec_time);
 }
 
 
