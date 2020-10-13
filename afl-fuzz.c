@@ -256,7 +256,7 @@ struct queue_entry {
   u64 exec_us,                        /* Execution time (us)              */
       handicap,                       /* Number of queue cycles behind    */
       depth,                          /* Path depth                       */
-      n_fuzz;                         /* Number of fuzz, does not overflow */
+      pm;                         /* Number of fuzz, does not overflow */
 
   u8* trace_mini;                     /* Trace bytes, if kept             */
   u32 tc_ref;                         /* Trace bytes ref count            */
@@ -795,7 +795,7 @@ static void add_to_queue(u8* fname, u32 len, u8 passed_det) {
   q->len          = len;
   q->depth        = cur_depth + 1;
   q->passed_det   = passed_det;
-  q->n_fuzz       = 1;
+  q->pm           = 1;
 
   if (q->depth > max_depth) max_depth = q->depth;
 
@@ -1252,7 +1252,7 @@ static void minimize_bits(u8* dst, u8* src) {
 static void update_bitmap_score(struct queue_entry* q) {
 
   u32 i;
-  u64 fuzz_p2      = next_p2 (q->n_fuzz);
+  u64 fuzz_p2      = next_p2 (q->pm);
   u64 fav_factor = q->exec_us * q->len;
 
   /* For every byte set in trace_bits[], see if there is a previous winner,
@@ -1264,7 +1264,7 @@ static void update_bitmap_score(struct queue_entry* q) {
 
        if (top_rated[i]) {
 
-         u64 top_rated_fuzz_p2    = next_p2 (top_rated[i]->n_fuzz);
+         u64 top_rated_fuzz_p2    = next_p2 (top_rated[i]->pm);
          u64 top_rated_fav_factor = top_rated[i]->exec_us * top_rated[i]->len;
 
 
@@ -3148,7 +3148,7 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
   struct queue_entry* q = queue;
   while (q) {
     if (q->exec_cksum == cksum)
-      q->n_fuzz = q->n_fuzz + 1;
+      q->pm = q->n_fuzz + 1;
 
     q = q->next;
 
@@ -7192,8 +7192,8 @@ static void usage(u8* argv0) {
 }
 
 /* output data */
-static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 n_fuzz,u64 exec_time){
-    fprintf(information_file,"len:%d favored:%u fuzz_level:%u n_fuzz:%llu exec_time:%llu \n",len,favored,fuzz_level,n_fuzz,exec_time);
+static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 pm,u64 exec_time){
+    fprintf(information_file,"len:%d favored:%u fuzz_level:%u pm:%llu exec_time:%llu \n",len,favored,fuzz_level,pm,exec_time);
 }
 
 
@@ -8203,7 +8203,7 @@ int main(int argc, char** argv) {
         sync_fuzzers(use_argv);
 
     }
-    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->n_fuzz,queue_cur->exec_us);
+    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us);
     skipped_fuzz = fuzz_one(use_argv);
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
