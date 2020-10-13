@@ -5180,6 +5180,10 @@ static u8 fuzz_one(char** argv) {
 
   if (perf_score == 0) goto abandon_entry;
 
+  if(!queue_cur->favored && queue_cur->fuzz_level==0 && queue_cur->n_fuzz > 1000){
+       goto havoc_stage;
+  }
+
   /* Skip right away if -d is given, if it has not been chosen sufficiently
      often to warrant the expensive deterministic stage (fuzz_level), or
      if it has gone through deterministic testing in earlier, resumed runs

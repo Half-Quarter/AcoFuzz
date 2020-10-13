@@ -218,8 +218,8 @@
 
 // pm
 #define PM_INIT   1
-#define PM_DECAY  0.8
-#define PM_REWARD 0.6
+#define PM_DECAY  0.3
+#define PM_REWARD 0.2
 
 /* List of interesting values to use in fuzzing. */
 
