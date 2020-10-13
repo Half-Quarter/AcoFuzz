@@ -7197,7 +7197,7 @@ static void usage(u8* argv0) {
 
 /* output data */
 static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 pm,u64 exec_time,u32 total_path,u64 cycle_done){
-    fprintf(information_file,"len:%d favored:%u fuzz_level:%u pm:%llu exec_time:%llu total_path:%d cycle:%u\n",len,favored,fuzz_level,pm,exec_time,total_path,cycle_done);
+    fprintf(information_file,"len:%d favored:%u fuzz_level:%u pm:%llu exec_time:%llu total_path:%d cycle:%d\n",len,favored,fuzz_level,pm,exec_time,total_path,cycle_done);
 }
 
 
