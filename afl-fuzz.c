@@ -7196,8 +7196,8 @@ static void usage(u8* argv0) {
 }
 
 /* output data */
-static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 pm,u64 exec_time,u32 total_path){
-    fprintf(information_file,"len:%d favored:%u fuzz_level:%u pm:%llu exec_time:%llu total_path:%llu\n",len,favored,fuzz_level,pm,exec_time,total_path);
+static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 pm,u64 exec_time,u32 total_path,u64 cycle_done){
+    fprintf(information_file,"len:%d favored:%u fuzz_level:%u pm:%llu exec_time:%llu total_path:%d cycle:%u\n",len,favored,fuzz_level,pm,exec_time,total_path,cycle_done);
 }
 
 
@@ -8210,7 +8210,7 @@ int main(int argc, char** argv) {
 
     skipped_fuzz = fuzz_one(use_argv);
 
-    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us,queued_paths);
+    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us,queued_paths,queue_cycle);
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
       
