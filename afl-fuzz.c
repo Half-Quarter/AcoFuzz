@@ -1268,9 +1268,17 @@ static void update_bitmap_score(struct queue_entry* q) {
          u64 top_rated_fav_factor = top_rated[i]->exec_us * top_rated[i]->len;
 
 
-
-         if (fav_factor > top_rated_fav_factor) continue;
-         if (fuzz_p2 > top_rated_fuzz_p2) continue;
+         if(fuzz_p2 > top_rated_fuzz_p2 ) {
+            continue;
+         }
+         else if(fuzz_p2 == top_rated_fuzz_p2 ) {
+            if(q->fuzz_level > top_rated[i]->fuzz_level) {
+              continue;
+            }
+            if(fav_factor > top_rated_fav_factor) {
+              continue;
+            }
+         }
 
          /* Looks like we're going to win. Decrease ref count for the
             previous winner, discard its trace_bits[] if necessary. */
@@ -5180,9 +5188,6 @@ static u8 fuzz_one(char** argv) {
 
   if (perf_score == 0) goto abandon_entry;
 
-  if(!queue_cur->favored && queue_cur->fuzz_level==0 && queue_cur->pm > 1000){
-       goto havoc_stage;
-  }
 
   /* Skip right away if -d is given, if it has not been chosen sufficiently
      often to warrant the expensive deterministic stage (fuzz_level), or
