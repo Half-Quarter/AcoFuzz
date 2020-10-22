@@ -98,15 +98,7 @@ EXP_ST u64 mem_limit  = MEM_LIMIT;    /* Memory cap for child (MB)        */
 
 static u32 stats_update_freq = 1;     /* Stats update frequency (execs)   */
 
-static u8 schedule = 0;               /* Power schedule (default: FAST)   */
-enum {
-  /* 00 */ FAST,                      /* Exponential schedule             */
-  /* 01 */ COE,                       /* Cut-Off Exponential schedule     */
-  /* 02 */ EXPLORE,                   /* Exploration-based constant sch.  */
-  /* 03 */ LIN,                       /* Linear schedule                  */
-  /* 04 */ QUAD,                      /* Quadratic schedule               */
-  /* 05 */ EXPLOIT                    /* AFL's exploitation-based const.  */
-};
+
 
 EXP_ST u8  skip_deterministic,        /* Skip deterministic stages?       */
            force_deterministic,       /* Force deterministic stages?      */
@@ -251,12 +243,13 @@ struct queue_entry {
 
   u32 bitmap_size,                    /* Number of bits set in bitmap     */
       fuzz_level,                     /* Number of fuzzing iterations     */
+      favor_time,                     /* Number of times selected as seeds of interest */
       exec_cksum;                     /* Checksum of the execution trace  */
 
   u64 exec_us,                        /* Execution time (us)              */
       handicap,                       /* Number of queue cycles behind    */
       depth,                          /* Path depth                       */
-      pm;                         /* Number of fuzz, does not overflow */
+      pm;                             /* Number of fuzz, does not overflow */
 
   u8* trace_mini;                     /* Trace bytes, if kept             */
   u32 tc_ref;                         /* Trace bytes ref count            */
@@ -4788,68 +4781,24 @@ static u32 calculate_score(struct queue_entry* q) {
   u32 n_paths, fuzz_mu;
   u32 factor = 1;
 
-  switch (schedule) {
 
-    case EXPLORE: 
-      break;
 
-    case EXPLOIT:
-      factor = MAX_FACTOR;
-      break;
-
-    case COE:
-      fuzz_total = 0;
-      n_paths = 0;
-
-      struct queue_entry *queue_it = queue;	
-      while (queue_it) {
-        fuzz_total += queue_it->pm;
-        n_paths ++;
-        queue_it = queue_it->next;
-      }
-
-      fuzz_mu = fuzz_total / n_paths;
-      if (fuzz <= fuzz_mu) {
-        if (q->fuzz_level < 16)
-          factor = ((u32) (1 << q->fuzz_level));
-        else 
-          factor = MAX_FACTOR;
-      } else {
-        factor = 0;
-      }
-      break;
-    
-    case FAST:
-      if(!q->fuzz_level == 0) {
+  if(!q->fuzz_level == 0) {
           if (q->fuzz_level < 16) {
               factor = ((u32) (1 << q->fuzz_level)) / (fuzz == 0 ? 1 : fuzz);
           } else
               factor = MAX_FACTOR / (fuzz == 0 ? 1 : next_p2(fuzz));
-      }
-      else
-          if(q->pm<=1) {
-              factor = 4;
-          }
-          else {
-              factor = 2;
-          }
-      break;
-
-    case LIN:
-      factor = q->fuzz_level / (fuzz == 0 ? 1 : fuzz); 
-      break;
-
-    case QUAD:
-      factor = q->fuzz_level * q->fuzz_level / (fuzz == 0 ? 1 : fuzz);
-      break;
-
-    default:
-      PFATAL ("Unkown Power Schedule");
   }
-  if (factor > MAX_FACTOR) 
-    factor = MAX_FACTOR;
+  else {
+      if (q->pm <= 1) {
+          factor = 4;
+      } else {
+          factor = 2;
+      }
+  }
 
-  perf_score *= factor / POWER_BETA;
+
+  perf_score *= factor;
 
   /* Make sure that we don't go over limit. */
 
@@ -7173,7 +7122,6 @@ static void usage(u8* argv0) {
 
        "Execution control settings:\n\n"
 
-       "  -p schedule   - power schedules recompute a seed's performance score.\n"
        "                  <fast (default), coe, explore, lin, quad, or exploit>\n"
        "  -f file       - location read by the fuzzed program (stdin)\n"
        "  -t msec       - timeout for each run (auto-scaled, 50-%u ms)\n"
@@ -8036,22 +7984,6 @@ int main(int argc, char** argv) {
 
         break;
 
-      case 'p': /* Power schedule */
-        if (!stricmp(optarg, "fast")) {
-          schedule = FAST;
-        } else if (!stricmp(optarg, "coe")) {
-          schedule = COE;
-        } else if (!stricmp(optarg, "exploit")) {
-          schedule = EXPLOIT;
-        } else if (!stricmp(optarg, "lin")) {
-          schedule = LIN;
-        } else if (!stricmp(optarg, "quad")) {
-          schedule = QUAD;
-        } else if (!stricmp(optarg, "explore")) {
-          schedule = EXPLORE;
-        }
-        break;
-
       default:
 
         usage(argv[0]);
@@ -8075,15 +8007,7 @@ int main(int argc, char** argv) {
 
   }
 
-  switch (schedule) {
-    case FAST:    OKF ("Using exponential power schedule (FAST)"); break;
-    case COE:     OKF ("Using cut-off exponential power schedule (COE)"); break;
-    case EXPLOIT: OKF ("Using exploitation-based constant power schedule (EXPLOIT)"); break;
-    case LIN:     OKF ("Using linear power schedule (LIN)"); break;
-    case QUAD:    OKF ("Using quadratic power schedule (QUAD)"); break;
-    case EXPLORE: OKF ("Using exploration-based constant power schedule (EXPLORE)"); break;
-    default : FATAL ("Unkown power schedule"); break;
-  }
+
 
   if (getenv("AFL_NO_FORKSRV"))    no_forkserver    = 1;
   if (getenv("AFL_NO_CPU_RED"))    no_cpu_meter_red = 1;
