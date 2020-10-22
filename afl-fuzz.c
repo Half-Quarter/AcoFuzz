@@ -4776,9 +4776,7 @@ static u32 calculate_score(struct queue_entry* q) {
   }
 
   u64 fuzz = q->pm;
-  u64 fuzz_total;
   now_fi = q->pm;
-  u32 n_paths, fuzz_mu;
   u32 factor = 1;
 
 
