@@ -221,6 +221,8 @@
 #define PM_DECAY  0.3
 #define PM_REWARD 0.2
 
+#define PM_D_DECAY 0.6
+#define PM_D_REWARD 0.4
 /* List of interesting values to use in fuzzing. */
 
 #define INTERESTING_8 \
