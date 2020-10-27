@@ -4365,7 +4365,8 @@ static void show_stats(void) {
 
 // After each round of fuzzy, the pheromone of each seed decays
 static void decay_pm(void){
-
+    u64 cur_ms;
+    cur_ms = get_cur_time();
     cur_pm_decay = PM_DECAY_DEFAULT;
 
     u64 min_wo_finds = (cur_ms - last_path_time) / 1000 / 60;
