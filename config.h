@@ -218,7 +218,13 @@
 
 // pm
 #define PM_INIT   1
-#define PM_DECAY  0.3
+#define PM_DECAY_DEFAULT  0.7
+
+//pm_decay
+#define PM_DECAY_MGN 0.7
+#define PM_DECAY_YEL 0.5
+#define PM_DECAY_LGN 0.3
+
 #define PM_REWARD 0.2
 
 #define PM_D_DECAY 0.6

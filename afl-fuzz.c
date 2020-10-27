@@ -166,6 +166,7 @@ EXP_ST u32 queued_paths,              /* Total number of queued testcases */
            current_entry,             /* Current queue entry ID           */
            now_fi,
            now_score,
+           cur_pm_decay,
            havoc_div = 1;             /* Cycle count divisor for havoc    */
 
 
@@ -4133,9 +4134,9 @@ static void show_stats(void) {
   SAYF("    map density : %s%-21s " bSTG bV "\n", t_byte_ratio > 70 ? cLRD : 
        ((t_bytes < 200 && !dumb_mode) ? cPIN : cRST), tmp);
 //
-  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DI(queue_cur->pm),DI(now_fi),DI(now_score));
+  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DI(cur_pm_decay),DI(now_fi),DI(now_score));
 
-  SAYF(bV bSTOP " si(fi)(nowfi)(score) : " cRST "%-17s " bSTG bV, tmp);
+  SAYF(bV bSTOP " si(decay)(fi)(score) : " cRST "%-17s " bSTG bV, tmp);
 //
   sprintf(tmp, "%0.02f bits/tuple",
           t_bytes ? (((double)t_bits) / t_bytes) : 0);
@@ -4365,9 +4366,23 @@ static void show_stats(void) {
 // After each round of fuzzy, the pheromone of each seed decays
 static void decay_pm(void){
 
+    cur_pm_decay = PM_DECAY_DEFAULT;
+
+    u64 min_wo_finds = (cur_ms - last_path_time) / 1000 / 60;
+
+    /* First queue cycle: don't stop now! */
+    if (queue_cycle == 1 || min_wo_finds < 15) cur_pm_decay = PM_DECAY_MGN; else
+
+    /* Subsequent cycles, but we're still making finds. */
+    if (cycles_wo_finds < 25 || min_wo_finds < 30) cur_pm_decay = PM_DECAY_YEL; else
+
+    /* No finds for a long time and no test cases to try. */
+    if (cycles_wo_finds > 100 && !pending_not_fuzzed && min_wo_finds > 120)
+        cur_pm_decay = PM_DECAY_LGN;
+
     struct queue_entry* q = queue;
     while (q) {
-        q->pm = q->pm * PM_DECAY;
+        q->pm = q->pm * cur_pm_decay;
         q = q->next;
     }
 }
