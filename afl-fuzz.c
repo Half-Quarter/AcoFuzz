@@ -4374,7 +4374,7 @@ static void decay_pm(void){
             q->pm = q->pm * PM_DECAY_YEL;
         }
         else if(color_status==3) {
-            q->pm = q->qm * PM_DECAY_LGN;
+            q->pm = q->pm * PM_DECAY_LGN;
         }
         else {
             q->pm = q->pm * PM_DECAY_DEFAULT;
