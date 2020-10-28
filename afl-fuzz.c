@@ -166,7 +166,7 @@ EXP_ST u32 queued_paths,              /* Total number of queued testcases */
            current_entry,             /* Current queue entry ID           */
            now_fi,
            now_score,
-           cur_pm_decay,
+           cur_pm_decay = PM_DECAY_DEFAULT,
            havoc_div = 1;             /* Cycle count divisor for havoc    */
 
 
@@ -4364,9 +4364,7 @@ static void show_stats(void) {
 
 // After each round of fuzzy, the pheromone of each seed decays
 static void decay_pm(void){
-    if(cur_pm_decay == 0) {
-        cur_pm_decay = PM_DECAY_DEFAULT;
-    }
+
     struct queue_entry* q = queue;
     while (q) {
         q->pm = q->pm * cur_pm_decay;
