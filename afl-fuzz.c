@@ -4133,7 +4133,7 @@ static void show_stats(void) {
   SAYF("    map density : %s%-21s " bSTG bV "\n", t_byte_ratio > 70 ? cLRD : 
        ((t_bytes < 200 && !dumb_mode) ? cPIN : cRST), tmp);
 //
-  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DI(cur_pm_decay),DI(now_fi),DI(now_score));
+  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DF(cur_pm_decay),DI(now_fi),DI(now_score));
 
   SAYF(bV bSTOP " si(decay)(fi)(score) : " cRST "%-17s " bSTG bV, tmp);
 //
@@ -4364,7 +4364,7 @@ static void show_stats(void) {
 
 // After each round of fuzzy, the pheromone of each seed decays
 static void decay_pm(void){
-    if(!cur_pm_decay) {
+    if(cur_pm_decay == 0) {
         cur_pm_decay = PM_DECAY_DEFAULT;
     }
     struct queue_entry* q = queue;
