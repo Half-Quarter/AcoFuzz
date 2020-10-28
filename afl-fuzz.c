@@ -4132,11 +4132,11 @@ static void show_stats(void) {
 
   SAYF("    map density : %s%-21s " bSTG bV "\n", t_byte_ratio > 70 ? cLRD : 
        ((t_bytes < 200 && !dumb_mode) ? cPIN : cRST), tmp);
-//
-  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DF(color_status),DI(now_fi),DI(now_score));
 
-  SAYF(bV bSTOP " si(decay)(fi)(score) : " cRST "%-17s " bSTG bV, tmp);
-//
+  sprintf(tmp, "%s(%s)(%s)", DI(queue_cur->fuzz_level),DI(now_fi),DI(now_score));
+
+  SAYF(bV bSTOP " si(fi)(score) : " cRST "%-17s " bSTG bV, tmp);
+
   sprintf(tmp, "%0.02f bits/tuple",
           t_bytes ? (((double)t_bits) / t_bytes) : 0);
 
@@ -4362,7 +4362,9 @@ static void show_stats(void) {
 
 }
 
-// After each round of fuzzy, the pheromone of each seed decays
+/* After each round of fuzzy,
+ the pheromone of each seed decays
+*/
 static void decay_pm(void){
 
     struct queue_entry* q = queue;
@@ -4383,6 +4385,9 @@ static void decay_pm(void){
     }
 }
 
+/* Every time a path is passed (running the seed once),
+ * the corresponding pheromone will accumulate.
+ * */
 static void accumulation_pm(void) {
 
     u32 cksum = hash32(trace_bits, MAP_SIZE, HASH_CONST);
