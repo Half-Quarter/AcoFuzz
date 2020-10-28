@@ -3132,7 +3132,7 @@ static void write_crash_readme(void) {
 
 }
 
-
+static void accumulation_pm(void);
 /* Check if the result of an execve() during routine fuzzing is interesting,
    save or queue the input test case for further analysis if so. Returns 1 if
    entry is saved, 0 otherwise. */
@@ -3143,8 +3143,9 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
   u8  hnb;
   s32 fd;
   u8  keeping = 0, res;
+  u32 cksum = hash32(trace_bits, MAP_SIZE, HASH_CONST);
 
-  pm_add();
+  accumulation_pm();
 
   if (fault == crash_mode) {
 
@@ -4373,7 +4374,7 @@ static void decay_pm(void){
     }
 }
 
-static void pm_add(void) {
+static void accumulation_pm(void) {
 
     u32 cksum = hash32(trace_bits, MAP_SIZE, HASH_CONST);
 
