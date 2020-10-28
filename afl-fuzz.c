@@ -3144,17 +3144,7 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
   s32 fd;
   u8  keeping = 0, res;
 
-  /* Update path frequency. */
-  u32 cksum = hash32(trace_bits, MAP_SIZE, HASH_CONST);
-
-  struct queue_entry* q = queue;
-  while (q) {
-    if (q->exec_cksum == cksum)
-      q->pm = q->pm + 1;
-
-    q = q->next;
-
-  }
+  pm_add();
 
   if (fault == crash_mode) {
 
@@ -4053,17 +4043,25 @@ static void show_stats(void) {
     u64 min_wo_finds = (cur_ms - last_path_time) / 1000 / 60;
 
     /* First queue cycle: don't stop now! */
-    if (queue_cycle == 1 || min_wo_finds < 15) strcpy(tmp, cMGN); else
-
-    /* Subsequent cycles, but we're still making finds. */
-    if (cycles_wo_finds < 25 || min_wo_finds < 30) strcpy(tmp, cYEL); else
-
+    if (queue_cycle == 1 || min_wo_finds < 15) {
+        cur_pm_decay = PM_DECAY_MGN;
+        strcpy(tmp, cMGN);
+    }
+   /* Subsequent cycles, but we're still making finds. */
+    else if (cycles_wo_finds < 25 || min_wo_finds < 30){
+        cur_pm_decay = PM_DECAY_YEL;
+        strcpy(tmp, cYEL);
+    }
     /* No finds for a long time and no test cases to try. */
-    if (cycles_wo_finds > 100 && !pending_not_fuzzed && min_wo_finds > 120)
-      strcpy(tmp, cLGN);
-
+    else if (cycles_wo_finds > 100 && !pending_not_fuzzed && min_wo_finds > 120) {
+        cur_pm_decay = PM_DECAY_LGN;
+        strcpy(tmp, cLGN);
+    }
     /* Default: cautiously OK to stop? */
-    else strcpy(tmp, cLBL);
+    else{
+        cur_pm_decay = PM_DECAY_LGN;
+        strcpy(tmp, cLBL);
+    }
 
   }
 
@@ -4365,25 +4363,25 @@ static void show_stats(void) {
 
 // After each round of fuzzy, the pheromone of each seed decays
 static void decay_pm(void){
-    u64 cur_ms;
-    cur_ms = get_cur_time();
-    cur_pm_decay = PM_DECAY_DEFAULT;
-
-    u64 min_wo_finds = (cur_ms - last_path_time) / 1000 / 60;
-
-    /* First queue cycle: don't stop now! */
-    if (queue_cycle == 1 || min_wo_finds < 15) cur_pm_decay = PM_DECAY_MGN; else
-
-    /* Subsequent cycles, but we're still making finds. */
-    if (cycles_wo_finds < 25 || min_wo_finds < 30) cur_pm_decay = PM_DECAY_YEL; else
-
-    /* No finds for a long time and no test cases to try. */
-    if (cycles_wo_finds > 100 && !pending_not_fuzzed && min_wo_finds > 120)
-        cur_pm_decay = PM_DECAY_LGN;
-
+    if(!cur_pm_decay) {
+        cur_pm_decay = PM_DECAY_DEFAULT;
+    }
     struct queue_entry* q = queue;
     while (q) {
         q->pm = q->pm * cur_pm_decay;
+        q = q->next;
+    }
+}
+
+static void pm_add(void) {
+
+    u32 cksum = hash32(trace_bits, MAP_SIZE, HASH_CONST);
+
+    struct queue_entry* q = queue;
+    while (q) {
+        if (q->exec_cksum == cksum)
+            q->pm = q->pm + 1;
+
         q = q->next;
     }
 }
@@ -5150,6 +5148,9 @@ static u8 fuzz_one(char** argv) {
 
   if (perf_score == 0) goto abandon_entry;
 
+  if(!skip_deterministic && queue_cur->len > 20 * 1024){
+      goto havoc_stage;
+  }
 
   /* Skip right away if -d is given, if it has not been chosen sufficiently
      often to warrant the expensive deterministic stage (fuzz_level), or
