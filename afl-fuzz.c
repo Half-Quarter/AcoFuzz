@@ -166,7 +166,7 @@ EXP_ST u32 queued_paths,              /* Total number of queued testcases */
            current_entry,             /* Current queue entry ID           */
            now_fi,
            now_score,
-           cur_pm_decay = PM_DECAY_DEFAULT,
+           color_status,
            havoc_div = 1;             /* Cycle count divisor for havoc    */
 
 
@@ -4045,22 +4045,22 @@ static void show_stats(void) {
 
     /* First queue cycle: don't stop now! */
     if (queue_cycle == 1 || min_wo_finds < 15) {
-        cur_pm_decay = PM_DECAY_MGN;
+        color_status = 1;
         strcpy(tmp, cMGN);
     }
    /* Subsequent cycles, but we're still making finds. */
     else if (cycles_wo_finds < 25 || min_wo_finds < 30){
-        cur_pm_decay = PM_DECAY_YEL;
+        color_status = 2;
         strcpy(tmp, cYEL);
     }
     /* No finds for a long time and no test cases to try. */
     else if (cycles_wo_finds > 100 && !pending_not_fuzzed && min_wo_finds > 120) {
-        cur_pm_decay = PM_DECAY_LGN;
+        color_status = 3;
         strcpy(tmp, cLGN);
     }
     /* Default: cautiously OK to stop? */
     else{
-        cur_pm_decay = PM_DECAY_LGN;
+        color_status = 3;
         strcpy(tmp, cLBL);
     }
 
@@ -4133,7 +4133,7 @@ static void show_stats(void) {
   SAYF("    map density : %s%-21s " bSTG bV "\n", t_byte_ratio > 70 ? cLRD : 
        ((t_bytes < 200 && !dumb_mode) ? cPIN : cRST), tmp);
 //
-  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DF(cur_pm_decay),DI(now_fi),DI(now_score));
+  sprintf(tmp, "%s(%s)(%s)(%s)", DI(queue_cur->fuzz_level),DF(color_status),DI(now_fi),DI(now_score));
 
   SAYF(bV bSTOP " si(decay)(fi)(score) : " cRST "%-17s " bSTG bV, tmp);
 //
@@ -4367,7 +4367,18 @@ static void decay_pm(void){
 
     struct queue_entry* q = queue;
     while (q) {
-        q->pm = q->pm * cur_pm_decay;
+        if(color_status<=1) {
+            q->pm = q->pm * PM_DECAY_MGN;
+        }
+        else if(color_status==2) {
+            q->pm = q->pm * PM_DECAY_YEL;
+        }
+        else if(color_status==3) {
+            q->pm = q->qm * PM_DECAY_LGN;
+        }
+        else {
+            q->pm = q->pm * PM_DECAY_DEFAULT;
+        }
         q = q->next;
     }
 }
