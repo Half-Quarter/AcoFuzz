@@ -8179,7 +8179,7 @@ int main(int argc, char** argv) {
     if(queue_cur->favored){
           queue_cur->favor_time++;
     }
-    cur_ms = get_cur_time();
+    u64 cur_ms = get_cur_time();
     write_to_file(getpasstime(cur_ms,start_time),queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us,queued_paths,
                   queue_cycle,queue_cur->depth,queue_cur->favor_time);
 
