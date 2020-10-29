@@ -698,6 +698,13 @@ static u8* DTD(u64 cur_ms, u64 event_ms) {
 
 }
 
+static u64 getpasstime(u64 cur_time,u64 start_time) {
+   u64 pt;
+   u64 delta;
+   delta = cur_time - start_time;
+   pt = delta / 1000 / 60 / 60 ;
+   return pt;
+}
 
 /* Mark deterministic checks as done for a particular queue entry. We use the
    .state file to avoid repeating deterministic fuzzing when resuming aborted
@@ -4014,7 +4021,7 @@ static void show_stats(void) {
 
   sprintf(tmp + banner_pad, "%s " cLCY VERSION cLGN
           " (%s)",  crash_mode ? cPIN "peruvian were-rabbit" : 
-          cYEL "afl-fuzz (iir)", use_banner);
+          cYEL "AcoFuzz", use_banner);
 
   SAYF("\n%s\n\n", tmp);
 
@@ -7178,9 +7185,9 @@ static void usage(u8* argv0) {
 }
 
 /* output data */
-static void write_to_file(u32 len,u8 favored,u32 fuzz_level,u64 pm,u64 exec_time,u32 total_path,u64 cycle_done,u64 depth,u32 favor_time){
-    fprintf(information_file,"len:%d favored:%u fuzz_level:%u pm:%llu exec_time:%llu total_path:%d cycle:%llu depth:%llu favor_time:%u\n",
-            len,favored,fuzz_level,pm,exec_time,total_path,cycle_done,depth,favor_time);
+static void write_to_file(u64 passtime,u32 len,u8 favored,u32 fuzz_level,u64 pm,u64 exec_time,u32 total_path,u64 cycle_done,u64 depth,u32 favor_time){
+    fprintf(information_file,"passtime:%llu len:%d favored:%u fuzz_level:%u pm:%llu exec_time:%llu total_path:%d cycle:%llu depth:%llu favor_time:%u\n",
+            passtime,len,favored,fuzz_level,pm,exec_time,total_path,cycle_done,depth,favor_time);
 }
 
 
@@ -7839,7 +7846,7 @@ int main(int argc, char** argv) {
   struct timeval tv;
   struct timezone tz;
 
-  SAYF(cCYA "afl-iir " cBRI VERSION cRST " \n");
+  SAYF(cCYA "AcoFuzz " cBRI VERSION cRST " \n");
 
   doc_path = access(DOC_PATH, F_OK) ? "docs" : DOC_PATH;
 
@@ -8172,7 +8179,8 @@ int main(int argc, char** argv) {
     if(queue_cur->favored){
           queue_cur->favor_time++;
     }
-    write_to_file(queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us,queued_paths,
+    cur_ms = get_cur_time();
+    write_to_file(getpasstime(cur_ms,start_time),queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us,queued_paths,
                   queue_cycle,queue_cur->depth,queue_cur->favor_time);
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
