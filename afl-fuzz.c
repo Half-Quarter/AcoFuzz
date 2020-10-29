@@ -702,7 +702,7 @@ static u64 getpasstime(u64 cur_time,u64 start_time) {
    u64 pt;
    u64 delta;
    delta = cur_time - start_time;
-   pt = delta / 1000 / 60 / 60 ;
+   pt = delta / 1000 ;
    return pt;
 }
 
@@ -8179,8 +8179,7 @@ int main(int argc, char** argv) {
     if(queue_cur->favored){
           queue_cur->favor_time++;
     }
-    u64 cur_ms = get_cur_time();
-    write_to_file(getpasstime(cur_ms,start_time),queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us,queued_paths,
+    write_to_file(getpasstime(get_cur_time(),start_time),queue_cur->len,queue_cur->favored,queue_cur->fuzz_level,queue_cur->pm,queue_cur->exec_us,queued_paths,
                   queue_cycle,queue_cur->depth,queue_cur->favor_time);
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
