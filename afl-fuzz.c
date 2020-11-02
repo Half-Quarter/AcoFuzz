@@ -799,7 +799,7 @@ static void add_to_queue(u8* fname, u32 len, u8 passed_det) {
   q->passed_det   = passed_det;
   q->pm           = 1;
   if(strcmp(stage_short,"havoc") ||strcmp(stage_short,"splice")) {
-      q->from_stage  ++ ;
+      q->from_stage  = 1 ;
   }
   else {
       q->from_stage  = 0;
@@ -5181,7 +5181,7 @@ static u8 fuzz_one(char** argv) {
    * ce to the original seed, and the relevance degree will be lower after
    * the iteration through havoc, so we decided to skip the deterministic
    * stage of low relevance to increase the efficiency of fuzzing.*/
-  if(queue_cur->from_stage >=2 && UR(100) < SKIP_NFAV_OLD_PROB){
+  if(queue_cur->from_stage && UR(100) < SKIP_NFAV_OLD_PROB){
       goto havoc_stage;
   }
 
