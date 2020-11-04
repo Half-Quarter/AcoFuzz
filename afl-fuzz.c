@@ -4823,9 +4823,12 @@ static u32 calculate_score(struct queue_entry* q) {
   u64 favor_level = q->favor_time;
   now_fi = q->pm;
   u32 factor = 1;
-  u32 k = 2;
+  u32 k = 1;
   if(!q->fuzz_level == 0) {
+          if (q->fuzz_level < 16) {
               factor = k * (favor_level == 0 ? 1 : favor_level) / (fuzz == 0 ? 1 : next_p2(fuzz));
+          } else
+              factor = MAX_FACTOR / (fuzz == 0 ? 1 : next_p2(fuzz));
   }
   else {
       if (q->pm <= 1) {
