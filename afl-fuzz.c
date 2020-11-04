@@ -167,7 +167,6 @@ EXP_ST u32 queued_paths,              /* Total number of queued testcases */
            now_fi,
            now_score,
            color_status,
-           is_havoc,
            havoc_div = 1;             /* Cycle count divisor for havoc    */
 
 
@@ -799,8 +798,8 @@ static void add_to_queue(u8* fname, u32 len, u8 passed_det) {
   q->depth        = cur_depth + 1;
   q->passed_det   = passed_det;
   q->pm           = 1;
-  if(is_havoc) {
-      q->from_stage  = 1;
+  if( stage_short == "havoc"  || stage_short == "splice" ) {
+      q->from_stage  ++ ;
   }
   else {
       q->from_stage  = 0;
@@ -5182,7 +5181,7 @@ static u8 fuzz_one(char** argv) {
    * ce to the original seed, and the relevance degree will be lower after
    * the iteration through havoc, so we decided to skip the deterministic
    * stage of low relevance to increase the efficiency of fuzzing.*/
-  if(queue_cur->from_stage  && queue_cur->depth > 7 && UR(100) < 10){
+  if(queue_cur->from_stage  && queue_cur->depth >2 && UR(100) < 30){
       goto havoc_stage;
   }
 
@@ -5226,7 +5225,6 @@ static u8 fuzz_one(char** argv) {
   /* Single walking bit. */
 
   stage_short = "flip1";
-  is_havoc    = 0;
   stage_max   = len << 3;
   stage_name  = "bitflip 1/1";
 
@@ -5324,7 +5322,6 @@ static u8 fuzz_one(char** argv) {
 
   stage_name  = "bitflip 2/1";
   stage_short = "flip2";
-  is_havoc    = 0;
   stage_max   = (len << 3) - 1;
 
   orig_hit_cnt = new_hit_cnt;
@@ -5352,7 +5349,6 @@ static u8 fuzz_one(char** argv) {
 
   stage_name  = "bitflip 4/1";
   stage_short = "flip4";
-  is_havoc    = 0;
   stage_max   = (len << 3) - 3;
 
   orig_hit_cnt = new_hit_cnt;
@@ -5408,7 +5404,6 @@ static u8 fuzz_one(char** argv) {
 
   stage_name  = "bitflip 8/8";
   stage_short = "flip8";
-  is_havoc    = 0;
   stage_max   = len;
 
   orig_hit_cnt = new_hit_cnt;
@@ -5418,6 +5413,7 @@ static u8 fuzz_one(char** argv) {
     stage_cur_byte = stage_cur;
 
     out_buf[stage_cur] ^= 0xFF;
+
     if (common_fuzz_stuff(argv, out_buf, len)) goto abandon_entry;
 
     /* We also use this stage to pull off a simple trick: we identify
@@ -5478,7 +5474,6 @@ static u8 fuzz_one(char** argv) {
 
   stage_name  = "bitflip 16/8";
   stage_short = "flip16";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = len - 1;
 
@@ -5516,7 +5511,6 @@ static u8 fuzz_one(char** argv) {
 
   stage_name  = "bitflip 32/8";
   stage_short = "flip32";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = len - 3;
 
@@ -5559,7 +5553,6 @@ skip_bitflip:
 
   stage_name  = "arith 8/8";
   stage_short = "arith8";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = 2 * len * ARITH_MAX;
 
@@ -5626,7 +5619,6 @@ skip_bitflip:
 
   stage_name  = "arith 16/8";
   stage_short = "arith16";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = 4 * (len - 1) * ARITH_MAX;
 
@@ -5721,7 +5713,6 @@ skip_bitflip:
 
   stage_name  = "arith 32/8";
   stage_short = "arith32";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = 4 * (len - 3) * ARITH_MAX;
 
@@ -5816,7 +5807,6 @@ skip_arith:
 
   stage_name  = "interest 8/8";
   stage_short = "int8";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = len * sizeof(interesting_8);
 
@@ -5872,7 +5862,6 @@ skip_arith:
 
   stage_name  = "interest 16/8";
   stage_short = "int16";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = 2 * (len - 1) * (sizeof(interesting_16) >> 1);
 
@@ -5941,7 +5930,6 @@ skip_arith:
 
   stage_name  = "interest 32/8";
   stage_short = "int32";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = 2 * (len - 3) * (sizeof(interesting_32) >> 2);
 
@@ -6017,7 +6005,6 @@ skip_interest:
 
   stage_name  = "user extras (over)";
   stage_short = "ext_UO";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = extras_cnt * len;
 
@@ -6076,7 +6063,6 @@ skip_interest:
 
   stage_name  = "user extras (insert)";
   stage_short = "ext_UI";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = extras_cnt * len;
 
@@ -6128,7 +6114,6 @@ skip_user_extras:
 
   stage_name  = "auto extras (over)";
   stage_short = "ext_AO";
-  is_havoc    = 0;
   stage_cur   = 0;
   stage_max   = MIN(a_extras_cnt, USE_AUTO_EXTRAS) * len;
 
@@ -6197,7 +6182,6 @@ havoc_stage:
 
     stage_name  = "havoc";
     stage_short = "havoc";
-    is_havoc    = 1;
     stage_max   = (doing_det ? HAVOC_CYCLES_INIT : HAVOC_CYCLES) *
                   perf_score / havoc_div / 100;
 
@@ -6210,7 +6194,6 @@ havoc_stage:
     sprintf(tmp, "splice %u", splice_cycle);
     stage_name  = tmp;
     stage_short = "splice";
-      is_havoc    = 1;
     stage_max   = SPLICE_HAVOC * perf_score / havoc_div / 100;
 
   }
