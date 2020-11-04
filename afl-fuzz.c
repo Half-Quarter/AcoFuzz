@@ -5181,7 +5181,7 @@ static u8 fuzz_one(char** argv) {
    * ce to the original seed, and the relevance degree will be lower after
    * the iteration through havoc, so we decided to skip the deterministic
    * stage of low relevance to increase the efficiency of fuzzing.*/
-  if(queue_cur->from_stage  && queue_cur->depth >2 && UR(100) < 30){
+  if(queue_cur->from_stage > 2 && queue_cur->depth >1 && UR(100) < SKIP_NFAV_OLD_PROB){
       goto havoc_stage;
   }
 
