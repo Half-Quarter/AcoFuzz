@@ -798,7 +798,7 @@ static void add_to_queue(u8* fname, u32 len, u8 passed_det) {
   q->depth        = cur_depth + 1;
   q->passed_det   = passed_det;
   q->pm           = 1;
-  if(strcmp(stage_short,"havoc") ||strcmp(stage_short,"splice")) {
+  if(strcmp(stage_short,"havoc") ||strcmp(stage_short,"splice") {
       q->from_stage  ++ ;
   }
   else {
