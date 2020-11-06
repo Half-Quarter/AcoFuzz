@@ -5211,7 +5211,7 @@ static u8 fuzz_one(char** argv) {
   stage_short = "flip1";
   stage_max   = len << 3;
   stage_name  = "bitflip 1/1";
-
+  u64 stage_start_time = get_cur_time();
   stage_val_type = STAGE_VAL_NONE;
 
   orig_hit_cnt = queued_paths + unique_crashes;
@@ -5228,6 +5228,9 @@ static u8 fuzz_one(char** argv) {
 
     FLIP_BIT(out_buf, stage_cur);
 
+    if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+        break;
+    }
     /* While flipping the least significant bit in every byte, pull of an extra
        trick to detect possible syntax tokens. In essence, the idea is that if
        you have a binary blob like this:
@@ -5307,7 +5310,7 @@ static u8 fuzz_one(char** argv) {
   stage_name  = "bitflip 2/1";
   stage_short = "flip2";
   stage_max   = (len << 3) - 1;
-
+  stage_start_time = get_cur_time();
   orig_hit_cnt = new_hit_cnt;
 
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++) {
@@ -5322,6 +5325,9 @@ static u8 fuzz_one(char** argv) {
     FLIP_BIT(out_buf, stage_cur);
     FLIP_BIT(out_buf, stage_cur + 1);
 
+    if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+    }
   }
 
   new_hit_cnt = queued_paths + unique_crashes;
@@ -5334,7 +5340,7 @@ static u8 fuzz_one(char** argv) {
   stage_name  = "bitflip 4/1";
   stage_short = "flip4";
   stage_max   = (len << 3) - 3;
-
+  stage_start_time = get_cur_time();
   orig_hit_cnt = new_hit_cnt;
 
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++) {
@@ -5353,6 +5359,9 @@ static u8 fuzz_one(char** argv) {
     FLIP_BIT(out_buf, stage_cur + 2);
     FLIP_BIT(out_buf, stage_cur + 3);
 
+    if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+    }
   }
 
   new_hit_cnt = queued_paths + unique_crashes;
@@ -5389,10 +5398,13 @@ static u8 fuzz_one(char** argv) {
   stage_name  = "bitflip 8/8";
   stage_short = "flip8";
   stage_max   = len;
-
+  stage_start_time = get_cur_time();
   orig_hit_cnt = new_hit_cnt;
 
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++) {
+    if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+    }
 
     stage_cur_byte = stage_cur;
 
@@ -5460,6 +5472,7 @@ static u8 fuzz_one(char** argv) {
   stage_short = "flip16";
   stage_cur   = 0;
   stage_max   = len - 1;
+  stage_start_time = get_cur_time();
 
   orig_hit_cnt = new_hit_cnt;
 
@@ -5497,6 +5510,7 @@ static u8 fuzz_one(char** argv) {
   stage_short = "flip32";
   stage_cur   = 0;
   stage_max   = len - 3;
+  stage_start_time = get_cur_time();
 
   orig_hit_cnt = new_hit_cnt;
 
@@ -5539,6 +5553,7 @@ skip_bitflip:
   stage_short = "arith8";
   stage_cur   = 0;
   stage_max   = 2 * len * ARITH_MAX;
+  stage_start_time = get_cur_time();
 
   stage_val_type = STAGE_VAL_LE;
 
@@ -5546,7 +5561,12 @@ skip_bitflip:
 
   for (i = 0; i < len; i++) {
 
-    u8 orig = out_buf[i];
+      if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+      }
+
+
+      u8 orig = out_buf[i];
 
     /* Let's consult the effector map... */
 
@@ -5605,10 +5625,14 @@ skip_bitflip:
   stage_short = "arith16";
   stage_cur   = 0;
   stage_max   = 4 * (len - 1) * ARITH_MAX;
+  stage_start_time = get_cur_time();
 
   orig_hit_cnt = new_hit_cnt;
 
   for (i = 0; i < len - 1; i++) {
+      if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+      }
 
     u16 orig = *(u16*)(out_buf + i);
 
@@ -5699,10 +5723,14 @@ skip_bitflip:
   stage_short = "arith32";
   stage_cur   = 0;
   stage_max   = 4 * (len - 3) * ARITH_MAX;
+  stage_start_time = get_cur_time();
 
   orig_hit_cnt = new_hit_cnt;
 
   for (i = 0; i < len - 3; i++) {
+      if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+      }
 
     u32 orig = *(u32*)(out_buf + i);
 
@@ -5793,6 +5821,7 @@ skip_arith:
   stage_short = "int8";
   stage_cur   = 0;
   stage_max   = len * sizeof(interesting_8);
+  stage_start_time = get_cur_time();
 
   stage_val_type = STAGE_VAL_LE;
 
@@ -5801,6 +5830,9 @@ skip_arith:
   /* Setting 8-bit integers. */
 
   for (i = 0; i < len; i++) {
+      if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+      }
 
     u8 orig = out_buf[i];
 
@@ -5848,10 +5880,14 @@ skip_arith:
   stage_short = "int16";
   stage_cur   = 0;
   stage_max   = 2 * (len - 1) * (sizeof(interesting_16) >> 1);
+  stage_start_time = get_cur_time();
 
   orig_hit_cnt = new_hit_cnt;
 
   for (i = 0; i < len - 1; i++) {
+      if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+      }
 
     u16 orig = *(u16*)(out_buf + i);
 
@@ -5916,10 +5952,14 @@ skip_arith:
   stage_short = "int32";
   stage_cur   = 0;
   stage_max   = 2 * (len - 3) * (sizeof(interesting_32) >> 2);
+  stage_start_time = get_cur_time();
 
   orig_hit_cnt = new_hit_cnt;
 
   for (i = 0; i < len - 3; i++) {
+      if(stage_cur > 100*1000 || (get_cur_time()-stage_start_time)>3*60*1000){
+          break;
+      }
 
     u32 orig = *(u32*)(out_buf + i);
 
